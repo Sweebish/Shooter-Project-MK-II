@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
-    public GameObject enemy;
+    [SerializeField]
+    private GameObject enemy;
     [SerializeField]
     private GameObject[] _powerUps;//Array for powerups can be filled with inspector
     [SerializeField]
@@ -39,9 +40,16 @@ public class SpawnManager : MonoBehaviour
         
         while (canSpawn == true)
         {
+            int chanceModifier;
             float pWaitTime = Random.Range(3f, 7f);//Random wait time between powerup spawns
             yield return new WaitForSeconds(pWaitTime);//how long to wait before spawning a new powerup
-            int randomPowerUp = Random.Range(0, 3);//Call random PowerUp
+            int randomPowerUp = Random.Range(0, 6);//Call random PowerUp
+            if(randomPowerUp == 6)
+            {
+                chanceModifier = Random.Range(0, 2);
+                randomPowerUp -= chanceModifier;
+                Debug.Log("ChanceModifier " + chanceModifier + " was Used.");
+            }
             Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 8, 0);//Where to spawn powerups
             Instantiate(_powerUps[randomPowerUp], posToSpawn, Quaternion.identity);//spawns a randomly selected powrup from array.
             

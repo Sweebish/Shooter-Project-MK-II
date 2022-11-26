@@ -15,6 +15,9 @@ public class UIManager : MonoBehaviour
     private TMP_Text _restartMessageText;
     private int _score;
     [SerializeField]
+    private TMP_Text _ammoText;
+    private int _ammoCount = 15;
+    [SerializeField]
     private Sprite[] _liveSprites;
     [SerializeField]
     private GameManager _gameManager;
@@ -29,21 +32,30 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         _scoreText.text = "Score: " + _score;
+        _ammoText.text = "Ammo: " + _ammoCount;
     }
     public void UpdateScore(int enemyValue)//Get's called by Enemy when it dies to update the player score.
     {
         _score += enemyValue;
     }
+
     public void UpdateLives(int currentLives)
     {
         _livesImage.sprite = _liveSprites[currentLives];
     }
+
+    public void UpdateAmmo(int ammo)
+    {
+        _ammoCount = ammo;
+    }
+
     public void GameOver()
     {
         _gameManager.GameOver();
         _restartMessageText.enabled = true;
         StartCoroutine(BlinkingGameOver());
     }
+
     IEnumerator BlinkingGameOver()
     {
         /*while (true)

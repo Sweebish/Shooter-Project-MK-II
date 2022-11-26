@@ -10,6 +10,8 @@ TagManager:
   - Damage_Left
   - Damage_Right
   - EnemyLaser
+  - AmmoRefill
+  - BeamLaser
   layers:
   - Default
   - TransparentFX

@@ -16,12 +16,16 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _tripleShotPrefab;
     [SerializeField]
+    private GameObject _ammoRefillPrefab;
+    [SerializeField]
     private GameObject[] _damageVisualizer;
     [SerializeField]
     private AudioClip _laserSound;
     private AudioSource _playerExplosion;
     [SerializeField]
     private AudioSource _audioSource;
+    [SerializeField]
+    private GameObject _beamLaser;
     private float _iFrames;
     private float _iFramesDuration = 0.2f;
     private AudioSource _powerUpSound;
@@ -34,6 +38,10 @@ public class Player : MonoBehaviour
     private bool _isTripleshotActive;
     private bool _isSpeedUpActive;
     private bool _isShieldActive;
+    private int _shieldStrength;
+    private bool _isThrusterActive;
+    private bool _isBeamLaserActive;
+    private int _ammoCount = 15;
     
     void Start()
     {
@@ -48,32 +56,44 @@ public class Player : MonoBehaviour
         _damageVisualizer[1].SetActive(false);
         _audioSource.clip = _laserSound;
     }
+
     void Update()
     {
         PlayerMovement();//Player movement controls
         PlayerBounds();//Limits on player movement
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire )
         {
-            Shooting();//Code for firing player weapons
-            _audioSource.Play();
+            Shooting(_isBeamLaserActive);//Code for firing player weapons
+            //_audioSource.Play();
         }
+        if(Input.GetKeyDown(KeyCode.LeftShift))
+        { 
+            _isThrusterActive= true;
+        }
+        else if(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            _isThrusterActive= false;
+        }        
         
     }
+
     void PlayerMovement()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
+        _playerSpeed = 5f;
         if (_isSpeedUpActive == true)
         {
-            _playerSpeed = 8.5f;
+            _playerSpeed = _playerSpeed * 1.5f;
         }
-        else if (_isSpeedUpActive == false)
+        else if (_isThrusterActive == true)
         {
-            _playerSpeed = 5f;
+            _playerSpeed = _playerSpeed * 1.5f;
         }
         transform.Translate(new Vector3(horizontalInput, verticalInput, 0) * Time.deltaTime * _playerSpeed);
 
     }
+
     void PlayerBounds()
     {
         if (transform.position.y >= 0)
@@ -93,47 +113,64 @@ public class Player : MonoBehaviour
             transform.position = new Vector3(11, transform.position.y, 0);
         }
     }
-    void Shooting()
+
+    void Shooting(bool beam)
     {
-        Vector3 offset = new Vector3(0, 1f, 0);
-        if (_isTripleshotActive == true)
+        if(_isBeamLaserActive== true)
         {
-            Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
-            _canFire = Time.time + _fireRate;
-            
-        }
-        else if (_isTripleshotActive == false)
-        {
-            Instantiate(_laserPrefab, transform.position + offset, Quaternion.identity);
-            _canFire = Time.time + _fireRate;
-        }
-    }
-    public void Damage()
-    {
-        if(_isShieldActive == true)//If the shield Powerup is active, prevent damage.
-        {
-            _isShieldActive = false;
-            _shieldSprite.SetActive(false);
             return;
         }
-        if(Time.time < _iFrames)// if the playe rtook damage recently, prevent further damage
+        Vector3 offset = new Vector3(0, 1f, 0);
+        if (_isTripleshotActive == true && _ammoCount > 0)
+        {
+            _ammoCount--;
+            _uimanager.UpdateAmmo(_ammoCount);
+            Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
+            _canFire = Time.time + _fireRate;
+            _audioSource.Play();
+
+        }
+        else if (_isTripleshotActive == false && _ammoCount > 0)
+        {
+            _ammoCount--;
+            _uimanager.UpdateAmmo(_ammoCount);
+            Instantiate(_laserPrefab, transform.position + offset, Quaternion.identity);
+            _canFire = Time.time + _fireRate;
+            _audioSource.Play();
+        }
+
+    }
+
+    public void Damage()
+    {
+        if (_isShieldActive == true)//If the shield Powerup is active, prevent damage.
+        {
+            _shieldStrength--;
+            switch (_shieldStrength)
+            {
+                case 0:
+                    _isShieldActive = false;
+                    _shieldSprite.SetActive(false);
+                    break;
+
+                case 1:
+                    _shieldSprite.GetComponent<SpriteRenderer>().color = Color.red;
+
+                    break;
+                case 2:
+                    _shieldSprite.GetComponent<SpriteRenderer>().color = Color.green;
+                    break;
+            }
+            return;
+        }
+        if (Time.time < _iFrames)// if the playe rtook damage recently, prevent further damage
         {
             return;
         }
         _lives--;
         _uimanager.UpdateLives(_lives);
         _iFrames = Time.time + _iFramesDuration;
-
-        switch(_lives)
-        {
-            case 1:
-                _damageVisualizer[0].SetActive(true);
-                _damageVisualizer[1].SetActive(true);
-                break;
-            case 2:
-                _damageVisualizer[0].SetActive(true);
-                break;
-        }
+        DamageVisualizerUpdate();
 
         if (_lives < 1)
         {
@@ -143,6 +180,26 @@ public class Player : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+    private void DamageVisualizerUpdate()
+    {
+        switch (_lives)
+        { 
+            case 1:
+                _damageVisualizer[0].SetActive(true);
+                _damageVisualizer[1].SetActive(true);
+                break;
+            case 2:
+                _damageVisualizer[0].SetActive(true);
+                _damageVisualizer[1].SetActive(false);
+                break;
+            case 3:
+                _damageVisualizer[0].SetActive(false);
+                _damageVisualizer[1].SetActive(false);
+                break;
+        }
+    }
+
     /*public void ActivateTripleShot()
     {
         _isTripleshotActive = true;
@@ -153,6 +210,7 @@ public class Player : MonoBehaviour
         _isSpeedUpActive = true;
         StartCoroutine(PowerUpCooldown(2));
     }*/
+
     private void NullChecks()
     {
         if(_audioSource == null)
@@ -176,6 +234,7 @@ public class Player : MonoBehaviour
         }
 
     }
+
     public void ActivatePowerup(int powerUpID)
     {
         _powerUpSound.Play();
@@ -191,10 +250,31 @@ public class Player : MonoBehaviour
                 break;
             case 2: 
                 _isShieldActive=true;
+                _shieldStrength = 3;
+                _shieldSprite.GetComponent<SpriteRenderer>().color = Color.white;
                 _shieldSprite.SetActive(true);
+                break;
+            case 3:
+                _ammoCount = 15;
+                _uimanager.UpdateAmmo(_ammoCount);
+                break;
+            case 4:
+                _lives++;
+                if(_lives > 3)
+                {
+                    _lives = 3;
+                }
+                _uimanager.UpdateLives(_lives);
+                DamageVisualizerUpdate();
+                break;
+            case 5:
+                _beamLaser.SetActive(true);
+                _isBeamLaserActive= true;
+                StartCoroutine(PowerUpCooldown(5));
                 break;
         }
     }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other.tag == "EnemyLaser")
@@ -202,6 +282,7 @@ public class Player : MonoBehaviour
             Damage();
         }
     }
+
 
     IEnumerator PowerUpCooldown(int powerUpID)
     {
@@ -211,6 +292,10 @@ public class Player : MonoBehaviour
             case 0: _isTripleshotActive = false;
                 break;
             case 1: _isSpeedUpActive = false;
+                break;
+            case 5:
+                _beamLaser.SetActive(false);
+                _isBeamLaserActive= false;
                 break;
         }
     }

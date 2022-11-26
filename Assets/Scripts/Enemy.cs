@@ -14,7 +14,7 @@ public class Enemy : MonoBehaviour
     private Collider2D _collider;
     private UIManager _uimanager;
     private Animator _animator;
-    private bool dead = false;
+    private bool _dead = false;
     private void Start()
     {
         _enemyExplosion = GameObject.Find("Explosion Sound").GetComponent<AudioSource>();
@@ -51,11 +51,15 @@ public class Enemy : MonoBehaviour
 
             StartCoroutine(DeathSequence());
         }
+        if(other.tag == "BeamLaser")
+        {
+            StartCoroutine(DeathSequence());
+        }
         IEnumerator DeathSequence()
         {
-            while (dead == false)
+            while (_dead == false)
             {
-                dead = true;
+                _dead = true;
                 _speed = 0f;
                 _collider.enabled = false;
                 _enemyExplosion.Play();
@@ -70,7 +74,7 @@ public class Enemy : MonoBehaviour
     {
         float shootWaitTime = Random.Range(3f, 7f);
         Vector3 offset = new Vector3(0f, -1.5f, 0);
-        while (true)
+        while (_dead == false)
         {
             yield return new WaitForSeconds(shootWaitTime);
             GameObject ELaser = Instantiate(_laserPrefab, transform.position + offset, Quaternion.identity);

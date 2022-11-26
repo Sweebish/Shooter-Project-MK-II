@@ -8,7 +8,7 @@ public class PowerUp : MonoBehaviour
     private float _speed = 3f;
     [SerializeField]
     private int _powerUpID;
-    //PowerUpIDs: 0=TripleShot 1=SpeedUp 2=Shield
+    //PowerUpIDs: 0=TripleShot 1=SpeedUp 2=Shield 3 = Ammo Refill
     void Update()
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
