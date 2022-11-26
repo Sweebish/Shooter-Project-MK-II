@@ -1,5 +1,5 @@
 //using OpenCover.Framework.Model;
-using System;
+//using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -8,7 +8,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
-{   
+{
+    [SerializeField]
+    private GameObject _camera;
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
@@ -26,6 +28,9 @@ public class Player : MonoBehaviour
     private AudioSource _audioSource;
     [SerializeField]
     private GameObject _beamLaser;
+    [SerializeField]
+    private GameObject _fuelBar;
+    private float _fuelValue = 30;
     private float _iFrames;
     private float _iFramesDuration = 0.2f;
     private AudioSource _powerUpSound;
@@ -34,7 +39,7 @@ public class Player : MonoBehaviour
     private float _playerSpeed = 5f;
     private float _fireRate = .15f;
     private float _canFire = -1f;
-    private int _lives = 3;  
+    private int _lives = 3;
     private bool _isTripleshotActive;
     private bool _isSpeedUpActive;
     private bool _isShieldActive;
@@ -42,12 +47,12 @@ public class Player : MonoBehaviour
     private bool _isThrusterActive;
     private bool _isBeamLaserActive;
     private int _ammoCount = 15;
-    
+
     void Start()
     {
         _powerUpSound = GameObject.Find("PowerUpSound").GetComponent<AudioSource>();
         _playerExplosion = GameObject.Find("Explosion Sound").GetComponent<AudioSource>();
-        _audioSource = GetComponent<AudioSource>();      
+        _audioSource = GetComponent<AudioSource>();
         _uimanager = GameObject.Find("Canvas").GetComponent<UIManager>();
         _spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
         transform.position = new Vector3(0, 0, 0);
@@ -60,23 +65,29 @@ public class Player : MonoBehaviour
     void Update()
     {
         PlayerMovement();//Player movement controls
+
         PlayerBounds();//Limits on player movement
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire )
+
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
             Shooting(_isBeamLaserActive);//Code for firing player weapons
             //_audioSource.Play();
         }
-        if(Input.GetKeyDown(KeyCode.LeftShift))
-        { 
-            _isThrusterActive= true;
-        }
-        else if(Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            _isThrusterActive= false;
-        }        
-        
-    }
 
+        if (Input.GetKey(KeyCode.LeftShift) && _fuelValue > 0)
+        {
+            _isThrusterActive = true;
+        }
+        else
+        {
+            _isThrusterActive = false;
+            _fuelValue = _fuelValue + 10f * Time.deltaTime;
+            if (_fuelValue > 30f)
+                _fuelValue = 30f;
+            _uimanager.UpdateFuel(_fuelValue);
+        }
+
+    }
     void PlayerMovement()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
@@ -88,7 +99,9 @@ public class Player : MonoBehaviour
         }
         else if (_isThrusterActive == true)
         {
-            _playerSpeed = _playerSpeed * 1.5f;
+            _playerSpeed = _playerSpeed * 2f;
+            _fuelValue = _fuelValue - 10 * Time.deltaTime;
+            _uimanager.UpdateFuel(_fuelValue);
         }
         transform.Translate(new Vector3(horizontalInput, verticalInput, 0) * Time.deltaTime * _playerSpeed);
 
@@ -116,7 +129,7 @@ public class Player : MonoBehaviour
 
     void Shooting(bool beam)
     {
-        if(_isBeamLaserActive== true)
+        if (_isBeamLaserActive == true)
         {
             return;
         }
@@ -171,6 +184,7 @@ public class Player : MonoBehaviour
         _uimanager.UpdateLives(_lives);
         _iFrames = Time.time + _iFramesDuration;
         DamageVisualizerUpdate();
+        StartCoroutine(_CameraShake());
 
         if (_lives < 1)
         {
@@ -184,7 +198,7 @@ public class Player : MonoBehaviour
     private void DamageVisualizerUpdate()
     {
         switch (_lives)
-        { 
+        {
             case 1:
                 _damageVisualizer[0].SetActive(true);
                 _damageVisualizer[1].SetActive(true);
@@ -213,15 +227,15 @@ public class Player : MonoBehaviour
 
     private void NullChecks()
     {
-        if(_audioSource == null)
+        if (_audioSource == null)
         {
             Debug.LogError("Player AudioSource == NULL");
         }
-        if(_uimanager == null)
+        if (_uimanager == null)
         {
             Debug.LogError("Player Failed to Call UIManager");
         }
-        if(_spawnManager== null)
+        if (_spawnManager == null)
         {
             Debug.LogError("Player Failed to Call SpawnManager");
         }
@@ -238,18 +252,18 @@ public class Player : MonoBehaviour
     public void ActivatePowerup(int powerUpID)
     {
         _powerUpSound.Play();
-        switch(powerUpID)
+        switch (powerUpID)
         {
             case 0:
                 _isTripleshotActive = true;
                 StartCoroutine(PowerUpCooldown(0));
                 break;
             case 1:
-                _isSpeedUpActive=true;
+                _isSpeedUpActive = true;
                 StartCoroutine(PowerUpCooldown(1));
                 break;
-            case 2: 
-                _isShieldActive=true;
+            case 2:
+                _isShieldActive = true;
                 _shieldStrength = 3;
                 _shieldSprite.GetComponent<SpriteRenderer>().color = Color.white;
                 _shieldSprite.SetActive(true);
@@ -260,7 +274,7 @@ public class Player : MonoBehaviour
                 break;
             case 4:
                 _lives++;
-                if(_lives > 3)
+                if (_lives > 3)
                 {
                     _lives = 3;
                 }
@@ -269,7 +283,7 @@ public class Player : MonoBehaviour
                 break;
             case 5:
                 _beamLaser.SetActive(true);
-                _isBeamLaserActive= true;
+                _isBeamLaserActive = true;
                 StartCoroutine(PowerUpCooldown(5));
                 break;
         }
@@ -277,7 +291,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.tag == "EnemyLaser")
+        if (other.tag == "EnemyLaser")
         {
             Damage();
         }
@@ -287,17 +301,34 @@ public class Player : MonoBehaviour
     IEnumerator PowerUpCooldown(int powerUpID)
     {
         yield return new WaitForSeconds(5f);
-        switch(powerUpID)
+        switch (powerUpID)
         {
-            case 0: _isTripleshotActive = false;
+            case 0:
+                _isTripleshotActive = false;
                 break;
-            case 1: _isSpeedUpActive = false;
+            case 1:
+                _isSpeedUpActive = false;
                 break;
             case 5:
                 _beamLaser.SetActive(false);
-                _isBeamLaserActive= false;
+                _isBeamLaserActive = false;
                 break;
         }
     }
-}
+    IEnumerator _CameraShake()
+    {
+        int i;
+        Vector3 _originalPos = new Vector3(0, 0, -10);
 
+        for (i = 5; i > 0f; i--)
+        {
+            float x = Random.Range (-0.5f, 0.5f);
+            float y = Random.Range (-0.5f, 0.5f);
+            float z = _camera.transform.position.z;
+            _camera.transform.position = new Vector3(x, y, z);
+            yield return new WaitForSeconds(0.1f);
+        }
+        _camera.transform.position = _originalPos;
+    }
+
+}

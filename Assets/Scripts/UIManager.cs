@@ -13,6 +13,9 @@ public class UIManager : MonoBehaviour
     private TMP_Text _gameOverText;
     [SerializeField]
     private TMP_Text _restartMessageText;
+    [SerializeField]
+    private Slider _fuelBar;
+    private float _fuelValue;
     private int _score;
     [SerializeField]
     private TMP_Text _ammoText;
@@ -33,6 +36,7 @@ public class UIManager : MonoBehaviour
     {
         _scoreText.text = "Score: " + _score;
         _ammoText.text = "Ammo: " + _ammoCount;
+        _fuelBar.value = _fuelValue;
     }
     public void UpdateScore(int enemyValue)//Get's called by Enemy when it dies to update the player score.
     {
@@ -55,6 +59,12 @@ public class UIManager : MonoBehaviour
         _restartMessageText.enabled = true;
         StartCoroutine(BlinkingGameOver());
     }
+
+    public void UpdateFuel(float fuelValue)
+    {
+        _fuelValue = fuelValue;
+    }
+
 
     IEnumerator BlinkingGameOver()
     {

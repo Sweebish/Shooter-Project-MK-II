@@ -59,6 +59,7 @@ public class Enemy : MonoBehaviour
         {
             while (_dead == false)
             {
+                StopCoroutine(EnemyShooting());
                 _dead = true;
                 _speed = 0f;
                 _collider.enabled = false;
@@ -74,7 +75,7 @@ public class Enemy : MonoBehaviour
     {
         float shootWaitTime = Random.Range(3f, 7f);
         Vector3 offset = new Vector3(0f, -1.5f, 0);
-        while (_dead == false)
+        while (true)
         {
             yield return new WaitForSeconds(shootWaitTime);
             GameObject ELaser = Instantiate(_laserPrefab, transform.position + offset, Quaternion.identity);
