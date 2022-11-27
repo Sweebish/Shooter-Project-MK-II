@@ -1,16 +1,10 @@
-//using OpenCover.Framework.Model;
-//using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-//using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _camera;
+    private Camera _camera;
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
@@ -60,6 +54,7 @@ public class Player : MonoBehaviour
         _damageVisualizer[0].SetActive(false);
         _damageVisualizer[1].SetActive(false);
         _audioSource.clip = _laserSound;
+        _uimanager.UpdateFuel(_fuelValue);
     }
 
     void Update()
@@ -74,6 +69,12 @@ public class Player : MonoBehaviour
             //_audioSource.Play();
         }
 
+        ThrusterControl();
+
+    }
+
+    private void ThrusterControl()
+    {
         if (Input.GetKey(KeyCode.LeftShift) && _fuelValue > 0)
         {
             _isThrusterActive = true;
@@ -81,13 +82,13 @@ public class Player : MonoBehaviour
         else
         {
             _isThrusterActive = false;
-            _fuelValue = _fuelValue + 10f * Time.deltaTime;
+            _fuelValue = _fuelValue + 1f * Time.deltaTime;
             if (_fuelValue > 30f)
                 _fuelValue = 30f;
             _uimanager.UpdateFuel(_fuelValue);
         }
-
     }
+
     void PlayerMovement()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
@@ -165,10 +166,8 @@ public class Player : MonoBehaviour
                     _isShieldActive = false;
                     _shieldSprite.SetActive(false);
                     break;
-
                 case 1:
                     _shieldSprite.GetComponent<SpriteRenderer>().color = Color.red;
-
                     break;
                 case 2:
                     _shieldSprite.GetComponent<SpriteRenderer>().color = Color.green;
@@ -317,15 +316,16 @@ public class Player : MonoBehaviour
     }
     IEnumerator _CameraShake()
     {
-        int i;
+        int i = 5;
         Vector3 _originalPos = new Vector3(0, 0, -10);
 
-        for (i = 5; i > 0f; i--)
+        while (i >0)
         {
             float x = Random.Range (-0.5f, 0.5f);
             float y = Random.Range (-0.5f, 0.5f);
             float z = _camera.transform.position.z;
             _camera.transform.position = new Vector3(x, y, z);
+            i--;
             yield return new WaitForSeconds(0.1f);
         }
         _camera.transform.position = _originalPos;

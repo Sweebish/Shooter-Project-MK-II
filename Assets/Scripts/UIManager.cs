@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         _scoreText.text = "Score: " + _score;
-        _ammoText.text = "Ammo: " + _ammoCount;
+        _ammoText.text = "Ammo: " + _ammoCount + "/15";
         _fuelBar.value = _fuelValue;
     }
     public void UpdateScore(int enemyValue)//Get's called by Enemy when it dies to update the player score.
