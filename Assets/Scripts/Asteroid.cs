@@ -25,7 +25,7 @@ public class Asteroid : MonoBehaviour
         Destroy(other.gameObject);
         if(other.tag == "Laser")
         {
-            _spawnmanager.StartSpawning();
+            _spawnmanager.StartDelay();
             _asteroidExplosion.Play();
             GetComponent<Collider2D>().enabled = false;
             GameObject explosion = Instantiate(_explosionPrefab, transform.position, Quaternion.identity) ;

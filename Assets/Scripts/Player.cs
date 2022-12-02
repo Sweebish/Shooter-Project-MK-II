@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     private GameObject _fuelBar;
     private float _fuelValue = 30;
     private float _iFrames;
-    private float _iFramesDuration = 0.2f;
+    private float _iFramesDuration = 0.5f;
     private AudioSource _powerUpSound;
     private UIManager _uimanager;
     private SpawnManager _spawnManager;
@@ -159,7 +159,12 @@ public class Player : MonoBehaviour
     {
         if (_isShieldActive == true)//If the shield Powerup is active, prevent damage.
         {
+            if (Time.time < _iFrames)// if the playe rtook damage recently, prevent further damage
+            {
+                return;
+            }
             _shieldStrength--;
+            _iFrames = Time.time + _iFramesDuration;
             switch (_shieldStrength)
             {
                 case 0:
@@ -174,6 +179,7 @@ public class Player : MonoBehaviour
                     break;
             }
             return;
+
         }
         if (Time.time < _iFrames)// if the playe rtook damage recently, prevent further damage
         {
