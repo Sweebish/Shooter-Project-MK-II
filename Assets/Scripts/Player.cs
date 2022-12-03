@@ -36,6 +36,7 @@ public class Player : MonoBehaviour
     private int _lives = 3;
     private bool _isTripleshotActive;
     private bool _isSpeedUpActive;
+    [SerializeField]
     private bool _isShieldActive;
     private int _shieldStrength;
     private bool _isThrusterActive;
@@ -291,6 +292,17 @@ public class Player : MonoBehaviour
                 _isBeamLaserActive = true;
                 StartCoroutine(PowerUpCooldown(5));
                 break;
+            case 42:
+                if(_isShieldActive ==true)
+                {
+                    _isShieldActive = false;
+                    _shieldSprite.SetActive(false);
+                }
+                else
+                {
+                    Damage();
+                }
+                break;
         }
     }
 
@@ -320,6 +332,7 @@ public class Player : MonoBehaviour
                 break;
         }
     }
+
     IEnumerator _CameraShake()
     {
         int i = 5;

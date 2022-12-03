@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
+    [SerializeField]
     private float _speed = 3f;
     [SerializeField]
     private int _powerUpID;

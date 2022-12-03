@@ -28,7 +28,6 @@ public class SpawnManager : MonoBehaviour
         _eSpawner = EnemySpawner();
         _pSpawner = PowerUpSpawner();
         _delayActive = true;
-        //_waveCounter++;
     }
 
     private void Update()
@@ -61,7 +60,6 @@ public class SpawnManager : MonoBehaviour
         {
             _delayActive = true;
             StopCoroutine(_eSpawner);
-            StopCoroutine(_pSpawner);
             StartDelay();
         }
         
@@ -106,6 +104,7 @@ public class SpawnManager : MonoBehaviour
     {
         if(!_newEnemy)
         {
+            StopCoroutine(_pSpawner);
             StartCoroutine(SpawnDelay());
         }
     }

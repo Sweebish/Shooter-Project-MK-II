@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
     private float _speed = 40f;
     private bool _isEnemyLaser;
+
     void Update()
     {
         if(_isEnemyLaser == false)
@@ -22,14 +20,17 @@ public class Laser : MonoBehaviour
         
         
     }
+
     void MoveUp()
     {
         transform.Translate(Vector3.up * Time.deltaTime * _speed);     
     }
+
     void MoveDown()
     {
         transform.Translate(Vector3.down * Time.deltaTime * _speed);
     }
+
     void RemoveSelf()
     {
         if(transform.position.y > 8 || transform.position.y < -8)
@@ -41,6 +42,7 @@ public class Laser : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
     public void AssignAsEnemy()
     {
         _isEnemyLaser = true;
