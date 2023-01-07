@@ -1,11 +1,20 @@
 using System.Collections;
 using System.Net.NetworkInformation;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Enemy : MonoBehaviour
 {
+    private bool _shotFired;
+    [SerializeField]
+    private int _shootSelector;
+    private string _hitTag;
+    private bool _laserTag;
     private int _eStrength;
     private int _scoreValue;
+    private bool _inDanger;
     [SerializeField]
     float _speed = 4f;
     [SerializeField]
@@ -19,6 +28,7 @@ public class Enemy : MonoBehaviour
     private Animator _animator;
     [SerializeField]
     private GameObject _shieldDrain;
+    [SerializeField]
     private int _movementType;
     private float _bounder;
     private int _bounderResult = 0;
@@ -34,21 +44,37 @@ public class Enemy : MonoBehaviour
 
     private void AssignValues()
     {
-        _scoreValue = 10;
+        _scoreValue = 10; // default score value
+        _laserTag = true; //Directes lasers up or down, set by firing conditions.
         _hPosition = transform.position.x;// sets initial spawn coord for WaggleMovement to use. 
-        ShieldFlip();
-        MovementSelector();
+        ShieldFlip();//rolls for an active enemy shield
+        MovementSelector();//decides which movement style teh enemy will use
+        ShootSelector();//decides if and which which augmented firing behavior the enemy will have
         _enemyExplosion = GameObject.Find("Explosion Sound").GetComponent<AudioSource>();
         _collider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
         _uimanager = GameObject.Find("Canvas").GetComponent<UIManager>();
-        _enemyShooter = ShootMethods();
+        _enemyShooter = ShootMethod();
+
         
     }
 
     void Update()
-    {      
+    {
+        RaycastHit2D hitDown = Physics2D.Raycast(transform.position, Vector2.down);//casts a ray down
+        RaycastHit2D hitUp = Physics2D.Raycast(transform.position, Vector2.up);//casts a ray up
+        if(hitDown.collider != null)
+        {
+            _hitTag = hitDown.collider.tag;
+            Debug.Log(hitDown.collider.tag);
+        }
+        if(hitUp.collider!= null && hitUp.collider.tag == "Player")//Detects if player is behind enemy.
+        {
+            _laserTag = false;//sets the shoot method to fire behind the enemy.
+        }
+        
         EnemyMovements();
+        PowerUpShot();
     }
 
     private void EnemyMovements()
@@ -60,17 +86,45 @@ public class Enemy : MonoBehaviour
                     break;
                 case 1: //Enemy side to side stafe momement
                     transform.Translate(Vector3.down * _speed * Time.deltaTime);
-                _bounder = transform.position.x;
-                WaggleMovement();
-                break;
+                    _bounder = transform.position.x;
+                    WaggleMovement();
+                    break;
+                case 2://Enemy Charge behavior
+                    transform.Translate(Vector3.down * _speed * Time.deltaTime);
+                    if (_hitTag == "Player")
+                    {
+                        _speed = 12;
+                    }
+                    break;
+                case 3:
+                    transform.Translate(Vector3.down * _speed * Time.deltaTime);
+                    float DodgeDirection;
+                    
+                    if (transform.position.x > 0)
+                    {
+                        DodgeDirection = -1.25f;
+                    }
+                    else
+                    {
+                        DodgeDirection = 1.25f;
+                    }
+                    if(_inDanger == true)
+                    {
+                    transform.position = new Vector3(transform.position.x + DodgeDirection, transform.position.y, 0);
+                    _inDanger= false;
+                    }
+                    break;
             }   
         
         if (transform.position.y <= -5.4)
         {
             _hPosition = Random.Range(-8f, 8f);
+            _shotFired = false;
+            _speed = 4;
+            _laserTag= true;
             transform.position = new Vector3(_hPosition, 8, 0);
         }
-    }
+    }//Handles enemy movements
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -99,9 +153,9 @@ public class Enemy : MonoBehaviour
             DeathSequence();
         }
         
-    }
+    }//handles various collisions
 
-    IEnumerator ShootMethods()
+    IEnumerator ShootMethod()
     {
         float shootWaitTime = Random.Range(3f, 7f);
         Vector3 offset = new Vector3(0f, -1.5f, 0);
@@ -112,11 +166,11 @@ public class Enemy : MonoBehaviour
             Laser[] lasers = ELaser.GetComponentsInChildren<Laser>();
             for(int i = 0; i < lasers.Length; i++)
             {
-                lasers[i].AssignAsEnemy();
+                lasers[i].UpOrDown(_laserTag);//False is down, True is up.
                 lasers[i].tag = "EnemyLaser";
             }
         }
-    }
+    }//handles enemy shooting
 
     private void DeathSequence()
     {
@@ -128,7 +182,7 @@ public class Enemy : MonoBehaviour
             _enemyExplosion.Play();
             _animator.SetTrigger("OnEnemyDeath");
             Destroy(this.gameObject, 2f);
-    }
+    }//handles all functions death related activity
 
     void WaggleMovement()
     {       
@@ -150,7 +204,7 @@ public class Enemy : MonoBehaviour
                 break;
         }
         
-    }
+    }//this movement causes the enemy to strafe side to side
 
     void TryForRevenge()
     {
@@ -159,7 +213,7 @@ public class Enemy : MonoBehaviour
         {
             Instantiate(_shieldDrain, new Vector3(Random.Range(-8f,8f), 8, 0), Quaternion.identity);
         }
-    }
+    }//rolls to spawn a damaging powerup to trick player
 
     void ShieldFlip()
     {
@@ -178,13 +232,19 @@ public class Enemy : MonoBehaviour
 
     void MovementSelector()
     {
-        _movementType = Random.Range(0, 2);//Pick a movement type to use
+        _movementType = Random.Range(0, 4);//Pick a movement type to use
         if(_movementType > 0)
         {
             _eStrength++;
             EnemyValueHandler();
         }
-    }
+    }//chooses which type of movement to use
+
+    void ShootSelector()
+    {
+        _shootSelector = Random.Range(0, 3);
+        //0 = normal shots | 1 = shoot backwards at player | 2 = shoot power ups
+    }//activates different shot behaviors
 
     void EnemyValueHandler()
     {
@@ -204,7 +264,7 @@ public class Enemy : MonoBehaviour
                 }
                 case 2:
                 {
-                    GetComponent<SpriteRenderer>().color = Color.blue;
+                    GetComponent<SpriteRenderer>().color = Color.cyan;
                     break;
                 }
                 case 3:
@@ -212,6 +272,39 @@ public class Enemy : MonoBehaviour
                     GetComponent<SpriteRenderer>().color = Color.red;
                     break;
                 }
+        }
+    }//changes enemy color based on how many upgrades it has
+
+    void PowerUpShot()
+    {
+        if(_shotFired == true)
+        {
+            return;
+        }
+        Vector3 offset = new Vector3(0f, -1.5f, 0);
+        if (_hitTag == "PowerUp" && _shootSelector == 2)
+        {
+            _shotFired= true;
+            GameObject ELaser = Instantiate(_laserPrefab, transform.position + offset, Quaternion.identity);
+            Laser[] lasers = ELaser.GetComponentsInChildren<Laser>();
+            for (int i = 0; i < lasers.Length; i++)
+            {
+                lasers[i].UpOrDown(_laserTag);//False is down, True is up.
+                lasers[i].tag = "EnemyLaser";
+            }
+        }
+    }//uses the raycast to spot and fire at powerups
+    void CheckForDanger()
+    {
+        GameObject[] Lasers;
+        Lasers = GameObject.FindGameObjectsWithTag("Laser");
+        for(int i = 0; i > Lasers.Length; i++)
+        {
+            float Distance = Vector3.Distance(Lasers[i].transform.position, transform.position);
+            if(Distance < 1f)
+            {
+                _inDanger= true;
+            }
         }
     }
 

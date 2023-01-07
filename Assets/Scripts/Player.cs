@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     private Camera _camera;
     [SerializeField]
@@ -42,7 +43,7 @@ public class Player : MonoBehaviour
     private bool _isThrusterActive;
     private bool _isBeamLaserActive;
     private int _ammoCount = 15;
-
+    #endregion
     void Start()
     {
         _powerUpSound = GameObject.Find("PowerUpSound").GetComponent<AudioSource>();
@@ -68,6 +69,18 @@ public class Player : MonoBehaviour
         {
             Shooting(_isBeamLaserActive);//Code for firing player weapons
             //_audioSource.Play();
+        }
+        
+        if(Input.GetKey(KeyCode.C))//when C is pressed by player powerups on screen whould fly to player.
+        {
+            GameObject[] pwrup;
+            pwrup = GameObject.FindGameObjectsWithTag("PowerUp");//find and add all in scene powerups tp the pwrup array
+            for (int i =0; i < pwrup.Length; i++)
+            {
+                pwrup[i].GetComponent<PowerUp>().GoToPlayer(transform,true);
+            }
+
+
         }
 
         ThrusterControl();

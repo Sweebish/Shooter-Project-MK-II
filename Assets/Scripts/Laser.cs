@@ -3,11 +3,11 @@ using UnityEngine;
 public class Laser : MonoBehaviour
 {
     private float _speed = 40f;
-    private bool _isEnemyLaser;
+    private bool _fireDown;
 
     void Update()
     {
-        if(_isEnemyLaser == false)
+        if(_fireDown == false)
         {
             MoveUp();
             RemoveSelf();
@@ -43,8 +43,8 @@ public class Laser : MonoBehaviour
         }
     }
 
-    public void AssignAsEnemy()
+    public void UpOrDown(bool Bool)
     {
-        _isEnemyLaser = true;
+        _fireDown = Bool;
     }
 }

@@ -7,6 +7,8 @@ using UnityEngine;
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField]
+    private UIManager _uiManager;
+    [SerializeField]
     private GameObject enemy;
     [SerializeField]
     private GameObject[] _powerUps;//Array for powerups can be filled with inspector
@@ -32,6 +34,18 @@ public class SpawnManager : MonoBehaviour
 
     private void Update()
     {
+        WaveManager();
+        if (_enemyCounter == _waveLimit)
+        {
+            _delayActive = true;
+            StopCoroutine(_eSpawner);
+            StartDelay();
+        }
+
+    }
+
+    private void WaveManager()
+    {
         switch (_waveCounter)
         {
             case 0:
@@ -55,15 +69,11 @@ public class SpawnManager : MonoBehaviour
             case 6:
                 _waveLimit = 1;
                 break;
+            default:
+                break;
         }
-        if (_enemyCounter == _waveLimit)
-        {
-            _delayActive = true;
-            StopCoroutine(_eSpawner);
-            StartDelay();
-        }
-        
     }
+
     public void OnplayerDeath()
     {
         _canSpawn = false;
@@ -85,16 +95,9 @@ public class SpawnManager : MonoBehaviour
     {
         while (_canSpawn == true)
         {
-            int chanceModifier;
             float pWaitTime = Random.Range(3f, 7f);//Random wait time between powerup spawns
             yield return new WaitForSeconds(pWaitTime);//how long to wait before spawning a new powerup
-            int randomPowerUp = Random.Range(0, 6);//Call random PowerUp
-            if(randomPowerUp == 5)
-            {
-                chanceModifier = Random.Range(0, 2);
-                randomPowerUp -= chanceModifier;
-                Debug.Log("ChanceModifier " + chanceModifier + " was Used.");
-            }
+            int randomPowerUp = Random.Range(0, 16);//Call random PowerUp
             Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 8, 0);//Where to spawn powerups
             Instantiate(_powerUps[randomPowerUp], posToSpawn, Quaternion.identity);//spawns a randomly selected powrup from array.
             
@@ -118,10 +121,13 @@ public class SpawnManager : MonoBehaviour
         while (_delayActive == true)
         {
             _waveCounter++;
+            _uiManager.WaveUpdate(_waveCounter);
+            _uiManager.WaveTextActive(true);
             _canSpawn= false;
             _enemyCounter= 0;
             Debug.Log("Spawn Delay Started");
             yield return new WaitForSeconds(5f);
+            _uiManager.WaveTextActive(false);
             _delayActive= false;
             _canSpawn= true;
             Debug.Log("Spawn Delay Done");

@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class Asteroid : MonoBehaviour
 {
+    
     private AudioSource _asteroidExplosion;
+ 
     SpawnManager _spawnmanager;
     [SerializeField]
     GameObject _explosionPrefab;

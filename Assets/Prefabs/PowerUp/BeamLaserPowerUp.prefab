@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 2725283999382478154}
   m_Layer: 0
   m_Name: BeamLaserPowerUp
-  m_TagString: Untagged
+  m_TagString: PowerUp
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -254,6 +254,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ba24343704dbf46ade83fb786161a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _speed: 3
   _powerUpID: 5
 --- !u!61 &-7706034839957432268
 BoxCollider2D:

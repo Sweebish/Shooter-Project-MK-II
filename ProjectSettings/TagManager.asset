@@ -12,6 +12,7 @@ TagManager:
   - EnemyLaser
   - AmmoRefill
   - BeamLaser
+  - PowerUp
   layers:
   - Default
   - TransparentFX

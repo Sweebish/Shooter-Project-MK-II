@@ -12,6 +12,9 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TMP_Text _restartMessageText;
     [SerializeField]
+    private TMP_Text _waveText;
+    private int _waveCount;
+    [SerializeField]
     private Slider _fuelBar;
     private float _fuelValue;
     private int _score;
@@ -26,6 +29,7 @@ public class UIManager : MonoBehaviour
     private Image _livesImage;
     private void Start()
     {
+        _waveText.enabled= false;
         _restartMessageText.enabled= false;
         _gameOverText.enabled= false;
         _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -34,6 +38,8 @@ public class UIManager : MonoBehaviour
     {
         _scoreText.text = "Score: " + _score;
         _ammoText.text = "Ammo: " + _ammoCount + "/15";
+        AmmoTextColor();
+        _waveText.text = "Wave " + _waveCount + " Start";
         _fuelBar.value = _fuelValue;
     }
     public void UpdateScore(int enemyValue)//Get's called by Enemy when it dies to update the player score.
@@ -51,6 +57,16 @@ public class UIManager : MonoBehaviour
         _ammoCount = ammo;
     }
 
+    public void WaveUpdate(int Wave)
+    {
+        _waveCount= Wave;
+    }
+    
+    public void WaveTextActive(bool Bool)
+    {
+        _waveText.enabled = Bool;
+    }
+
     public void GameOver()
     {
         _gameManager.GameOver();
@@ -61,6 +77,22 @@ public class UIManager : MonoBehaviour
     public void UpdateFuel(float fuelValue)
     {
         _fuelValue = fuelValue;
+    }
+
+    private void AmmoTextColor()
+    {
+        switch(_ammoCount)
+        {
+            case 0: 
+                _ammoText.GetComponent<TMP_Text>().color= Color.red;
+                break;
+            case 5:
+                _ammoText.GetComponent<TMP_Text>().color= Color.yellow;
+                break;
+            case 15:
+                _ammoText.GetComponent<TMP_Text>().color= Color.white;
+                break;
+        }
     }
 
 
