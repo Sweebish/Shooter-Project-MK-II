@@ -419,6 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 696874034b88f8f42a9decbf38e17c02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camera: {fileID: 0}
   _laserPrefab: {fileID: 5296861247538092696, guid: e0a2215a22c982c46b2cb7678364e8d3, type: 3}
   _shieldSprite: {fileID: 803214557}
   _tripleShotPrefab: {fileID: 539237734642145787, guid: 06ab3f2f9fb8e6942825804b16671be3, type: 3}
@@ -429,6 +430,9 @@ MonoBehaviour:
   _laserSound: {fileID: 8300000, guid: 75676f361bdfeaf41a46623e95df3dbc, type: 3}
   _audioSource: {fileID: 0}
   _beamLaser: {fileID: 1593288751943866118}
+  _fuelBar: {fileID: 0}
+  _isShieldActive: 0
+  _missilePrefab: {fileID: 6981792472116764002, guid: 3449044b06e936d41a68d47d1e4a77f4, type: 3}
 --- !u!61 &-4002635483092445760
 BoxCollider2D:
   m_ObjectHideFlags: 0

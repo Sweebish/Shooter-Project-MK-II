@@ -15,7 +15,7 @@ public class PowerUp : MonoBehaviour
     private bool _moveToPlayer;
     private Transform _target;
     private Vector3 _powerUpMovement;
-    //PowerUpIDs: 0=TripleShot | 1=SpeedUp | 2=Shield | 3 = Ammo Refill | 4 = Health Refill | 5 = Beam Laser
+    //PowerUpIDs: 0=TripleShot | 1=SpeedUp | 2=Shield | 3 = Ammo Refill | 4 = Health Refill | 5 = Beam Laser | 6 = Homing Missle
     private void Start()
     {
         _powerUpMovement= Vector3.down;

@@ -97,7 +97,7 @@ public class SpawnManager : MonoBehaviour
         {
             float pWaitTime = Random.Range(3f, 7f);//Random wait time between powerup spawns
             yield return new WaitForSeconds(pWaitTime);//how long to wait before spawning a new powerup
-            int randomPowerUp = Random.Range(0, 16);//Call random PowerUp
+            int randomPowerUp = Random.Range(0, 17);//Call random PowerUp
             Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 8, 0);//Where to spawn powerups
             Instantiate(_powerUps[randomPowerUp], posToSpawn, Quaternion.identity);//spawns a randomly selected powrup from array.
             

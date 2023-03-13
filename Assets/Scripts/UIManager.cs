@@ -27,6 +27,9 @@ public class UIManager : MonoBehaviour
     private GameManager _gameManager;
     [SerializeField]
     private Image _livesImage;
+    [SerializeField]
+    private TMP_Text _missileText;
+    private int _missileCount = 0;
     private void Start()
     {
         _waveText.enabled= false;
@@ -41,13 +44,14 @@ public class UIManager : MonoBehaviour
         AmmoTextColor();
         _waveText.text = "Wave " + _waveCount + " Start";
         _fuelBar.value = _fuelValue;
+        _missileText.text = "Missiles: " + _missileCount;
     }
     public void UpdateScore(int enemyValue)//Get's called by Enemy when it dies to update the player score.
     {
         _score += enemyValue;
     }
 
-    public void UpdateLives(int currentLives)
+    public void UpdateLives(int currentLives)//Is called to update the lives sprite
     {
         _livesImage.sprite = _liveSprites[currentLives];
     }
@@ -93,6 +97,11 @@ public class UIManager : MonoBehaviour
                 _ammoText.GetComponent<TMP_Text>().color= Color.white;
                 break;
         }
+    }
+
+    public void UpdateMissiles (int missileCount)
+    {
+        _missileCount = missileCount;
     }
 
 

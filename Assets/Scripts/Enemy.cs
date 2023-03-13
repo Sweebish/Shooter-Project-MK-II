@@ -7,6 +7,7 @@ using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Enemy : MonoBehaviour
 {
+    #region Variables
     private bool _shotFired;
     [SerializeField]
     private int _shootSelector;
@@ -34,6 +35,7 @@ public class Enemy : MonoBehaviour
     private int _bounderResult = 0;
     private bool _isShieldActive;
     private IEnumerator _enemyShooter;
+    #endregion
 
     private void Start()
     {
@@ -48,7 +50,7 @@ public class Enemy : MonoBehaviour
         _laserTag = true; //Directes lasers up or down, set by firing conditions.
         _hPosition = transform.position.x;// sets initial spawn coord for WaggleMovement to use. 
         ShieldFlip();//rolls for an active enemy shield
-        MovementSelector();//decides which movement style teh enemy will use
+        MovementSelector();//decides which movement style the enemy will use
         ShootSelector();//decides if and which which augmented firing behavior the enemy will have
         _enemyExplosion = GameObject.Find("Explosion Sound").GetComponent<AudioSource>();
         _collider = GetComponent<Collider2D>();
@@ -66,7 +68,6 @@ public class Enemy : MonoBehaviour
         if(hitDown.collider != null)
         {
             _hitTag = hitDown.collider.tag;
-            Debug.Log(hitDown.collider.tag);
         }
         if(hitUp.collider!= null && hitUp.collider.tag == "Player")//Detects if player is behind enemy.
         {
@@ -75,6 +76,7 @@ public class Enemy : MonoBehaviour
         
         EnemyMovements();
         PowerUpShot();
+        CheckForDanger();
     }
 
     private void EnemyMovements()
@@ -96,7 +98,7 @@ public class Enemy : MonoBehaviour
                         _speed = 12;
                     }
                     break;
-                case 3:
+                case 3: //Enemy Dodge Behavior
                     transform.Translate(Vector3.down * _speed * Time.deltaTime);
                     float DodgeDirection;
                     
@@ -150,6 +152,12 @@ public class Enemy : MonoBehaviour
         if(other.tag == "BeamLaser")
         {
             _enemyShield.SetActive(false);
+            DeathSequence();
+        }
+        if(other.tag == "Missle")
+        {
+            _enemyShield.SetActive(false);
+            other.GetComponent<HomingMissle>().OnHit();
             DeathSequence();
         }
         

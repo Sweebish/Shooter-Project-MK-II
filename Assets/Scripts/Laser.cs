@@ -1,9 +1,12 @@
+using System.Collections;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Laser : MonoBehaviour
 {
     private float _speed = 40f;
     private bool _fireDown;
+    private bool _isHoming;
 
     void Update()
     {
@@ -16,9 +19,7 @@ public class Laser : MonoBehaviour
         {
             MoveDown();
             RemoveSelf();
-        }
-        
-        
+        }      
     }
 
     void MoveUp()
@@ -47,4 +48,5 @@ public class Laser : MonoBehaviour
     {
         _fireDown = Bool;
     }
+
 }

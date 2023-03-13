@@ -43,6 +43,9 @@ public class Player : MonoBehaviour
     private bool _isThrusterActive;
     private bool _isBeamLaserActive;
     private int _ammoCount = 15;
+    private int _missileCount = 0;
+    [SerializeField]
+    private GameObject _missilePrefab;
     #endregion
     void Start()
     {
@@ -80,8 +83,15 @@ public class Player : MonoBehaviour
                 pwrup[i].GetComponent<PowerUp>().GoToPlayer(transform,true);
             }
 
-
         }
+        if(Input.GetKeyDown(KeyCode.F) && _missileCount > 0)//Fires missile if one is available, decrement missile count
+        {
+            _missileCount--;
+            Instantiate(_missilePrefab, transform.position, Quaternion.identity);
+            _uimanager.UpdateMissiles(_missileCount);
+        }
+
+
 
         ThrusterControl();
 
@@ -304,6 +314,14 @@ public class Player : MonoBehaviour
                 _beamLaser.SetActive(true);
                 _isBeamLaserActive = true;
                 StartCoroutine(PowerUpCooldown(5));
+                break;
+            case 6:
+                _missileCount++;
+                if(_missileCount> 2)
+                {
+                    _missileCount = 2;
+                }
+                _uimanager.UpdateMissiles(_missileCount);
                 break;
             case 42:
                 if(_isShieldActive ==true)

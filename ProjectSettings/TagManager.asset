@@ -13,6 +13,7 @@ TagManager:
   - AmmoRefill
   - BeamLaser
   - PowerUp
+  - Missle
   layers:
   - Default
   - TransparentFX
