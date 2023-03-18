@@ -11,6 +11,8 @@ public class SpawnManager : MonoBehaviour
     [SerializeField]
     private GameObject enemy;
     [SerializeField]
+    private GameObject _bossPrefab;
+    [SerializeField]
     private GameObject[] _powerUps;//Array for powerups can be filled with inspector
     [SerializeField]
     private GameObject _enemyContainer;//Empty container to avoid clutter in Hierarchy from enemy spawns
@@ -24,11 +26,14 @@ public class SpawnManager : MonoBehaviour
     private GameObject _newEnemy;
     private IEnumerator _eSpawner;
     private IEnumerator _pSpawner;
+    private IEnumerator _sDelay;
+    private bool _bossSpawned;
 
     private void Start()
     {
         _eSpawner = EnemySpawner();
         _pSpawner = PowerUpSpawner();
+        _sDelay = SpawnDelay();
         _delayActive = true;
     }
 
@@ -52,22 +57,22 @@ public class SpawnManager : MonoBehaviour
                 _waveLimit = 5000;
                 break;
             case 1:
-                _waveLimit = 3;
+                _waveLimit = 1;//3
                 break;
             case 2:
-                _waveLimit = 5;
+                _waveLimit = 1;//5
                 break;
             case 3:
-                _waveLimit = 7;
+                _waveLimit = 1;//7
                 break;
             case 4:
-                _waveLimit = 10;
+                _waveLimit = 1;//10
                 break;
             case 5:
-                _waveLimit = 15;
+                _waveLimit = 1;//15
                 break;
             case 6:
-                _waveLimit = 1;
+                
                 break;
             default:
                 break;
@@ -120,18 +125,36 @@ public class SpawnManager : MonoBehaviour
     {
         while (_delayActive == true)
         {
-            _waveCounter++;
-            _uiManager.WaveUpdate(_waveCounter);
-            _uiManager.WaveTextActive(true);
-            _canSpawn= false;
-            _enemyCounter= 0;
-            Debug.Log("Spawn Delay Started");
-            yield return new WaitForSeconds(5f);
-            _uiManager.WaveTextActive(false);
-            _delayActive= false;
-            _canSpawn= true;
-            Debug.Log("Spawn Delay Done");
-            StartSpawning();
+            if(_waveCounter < 6)
+            {
+                _waveCounter++;
+            }
+            if (_waveCounter < 6)
+            {
+                _uiManager.WaveUpdate(_waveCounter);
+                _uiManager.WaveTextActive(true);
+                _canSpawn = false;
+                _enemyCounter = 0;
+                Debug.Log("Spawn Delay Started");
+                yield return new WaitForSeconds(5f);
+                _uiManager.WaveTextActive(false);
+                _delayActive = false;
+                _canSpawn = true;
+                Debug.Log("Spawn Delay Done");
+                StartSpawning();
+                yield break;
+            }
+            else if (_waveCounter == 6 && _bossSpawned == false)
+            {
+                _canSpawn = false;
+                _bossSpawned =true;
+                StopCoroutine(_eSpawner);
+                Instantiate(_bossPrefab, new Vector3(0, 8, 0), Quaternion.identity);
+                _delayActive= false;
+                StopCoroutine(_sDelay);
+                yield break;
+            }
+
             yield break;
         }
     }

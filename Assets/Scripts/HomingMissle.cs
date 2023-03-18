@@ -8,7 +8,6 @@ public class HomingMissle : MonoBehaviour
     private GameObject _target;
     private float _rSpeed = 400;
     private Rigidbody2D _missleRB;
-    // Start is called before the first frame update
     void Start()
     {
         _missleRB= GetComponent<Rigidbody2D>();
@@ -16,27 +15,30 @@ public class HomingMissle : MonoBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(_target == null)
+        if(_target == null)//if the _target is empty, look for a target.
         {
             _target = TargetScanner();
         }
-        if(_target !=null)
+
+        if(_target !=null)//if _target has a value, start HomingMovement
         {
             HomingMovement();
         }
-        else
+
+        else//if there is no target just fly up.
         {
             transform.Translate(Vector3.up * _speed * Time.deltaTime);
         }
-        if(transform.position.y > 8) 
+
+        if(transform.position.y > 8)
         {
             Destroy(gameObject);
         }
+
     }
-    private void HomingMovement()
+    private void HomingMovement()// How to fly to _target
     {
         Vector2 direction = (Vector2)_target.transform.position - _missleRB.position;
         direction.Normalize();
@@ -45,7 +47,7 @@ public class HomingMissle : MonoBehaviour
         _missleRB.velocity = transform.up * _speed;
     }
 
-    private GameObject TargetScanner()
+    private GameObject TargetScanner()// scans for nearest enemy and returns closest.
     {
         GameObject[] targets;
         targets = GameObject.FindGameObjectsWithTag("Enemy");
